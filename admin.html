@@ -198,7 +198,10 @@
 
   <!-- فهرست -->
   <div class="card" id="listCard" style="display:none;">
-    <h2 id="listTitle">📚 محتوای فعلی دوره آنلاین در سایت</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <h2 id="listTitle" style="margin-bottom:0;">📚 محتوای فعلی دوره آنلاین در سایت</h2>
+      <button type="button" class="btn sm gray" id="reloadBtn" style="margin:0;">🔄 دریافت تازه‌ترین اطلاعات از سایت</button>
+    </div>
     <div id="itemsList"></div>
     <div class="msg" id="listMsg"></div>
   </div>
@@ -240,6 +243,7 @@
       'Authorization': 'Bearer ' + token,
       'Accept': 'application/vnd.github+json'
     };
+    opts.cache = 'no-store';
     return fetch(API + path, opts);
   }
 
@@ -268,11 +272,15 @@
   }
   if($('tabCourse')) $('tabCourse').addEventListener('click', function(){ switchTab('course'); });
   if($('tabActivities')) $('tabActivities').addEventListener('click', function(){ switchTab('activities'); });
+  if($('reloadBtn')) $('reloadBtn').addEventListener('click', function(){
+    if($('listMsg')) hide('listMsg');
+    loadContent();
+  });
 
   /* ---------- load ---------- */
   function loadContent(){
     show('loginMsg','info','در حال اتصال به گیت‌هاب…');
-    gh('content.json?ref=main').then(function(r){
+    gh('content.json?ref=main&_nocache=' + Date.now()).then(function(r){
       if(r.status === 401) throw new Error('توکن نامعتبر است. دوباره بسازید.');
       if(r.status === 404) return null;
       if(!r.ok) throw new Error('خطای اتصال (' + r.status + ')');
@@ -575,6 +583,6 @@
 })();
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a158f4ca6b9b0eda',t:'MTc4MzExMzg1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-</body>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a15936b95827d0a0',t:'MTc4MzExNjU1OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
