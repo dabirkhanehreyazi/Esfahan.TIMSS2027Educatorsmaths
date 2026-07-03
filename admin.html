@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>پنل مدیریت محتوای دوره</title>
+<style>
+  :root{--navy:#0d6e6e;--navy-dark:#073f3f;--gold:#c9a24b;--gold-light:#e8cf94;--cream:#faf6ee;}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Vazirmatn,Tahoma,"Segoe UI",sans-serif;}
+  body{background:var(--cream);color:#2a2f3a;line-height:1.9;padding-bottom:60px;}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy-dark));color:#fff;padding:18px 20px;text-align:center;border-bottom:3px solid var(--gold);}
+  header h1{font-size:20px;color:var(--gold-light);}
+  header p{font-size:12.5px;color:#c9d4ea;}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px;}
+  .card{background:#fff;border:1px solid #eadfc7;border-radius:16px;padding:22px 20px;margin-bottom:20px;box-shadow:0 8px 20px rgba(13,110,110,.07);}
+  .card h2{font-size:16.5px;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  label{display:block;font-size:13.5px;font-weight:700;color:var(--navy);margin:12px 0 4px;}
+  input[type=text],input[type=password],select,textarea{
+    width:100%;padding:10px 14px;border:1.5px solid #d8cdb4;border-radius:10px;
+    font-size:14px;background:#fffdf8;transition:.2s;font-family:inherit;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,75,.15);}
+  .hint{font-size:11.5px;color:#9aa0ad;margin-top:3px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--navy),#125e5e);color:#fff;
+    font-size:14.5px;font-weight:700;padding:11px 26px;border-radius:24px;
+    transition:.25s;font-family:inherit;margin-top:16px;
+  }
+  .btn:hover{background:linear-gradient(135deg,var(--gold),#b8903a);color:var(--navy-dark);}
+  .btn:disabled{opacity:.5;cursor:wait;}
+  .btn.sm{padding:6px 14px;font-size:12.5px;margin:0;}
+  .btn.danger{background:linear-gradient(135deg,#a33,#7a1f1f);}
+  .btn.gray{background:linear-gradient(135deg,#6a7284,#4a5164);}
+  .btn.gold{background:linear-gradient(135deg,var(--gold),#b8903a);color:var(--navy-dark);}
+  .msg{border-radius:12px;padding:12px 16px;font-size:13.5px;margin-top:14px;display:none;}
+  .msg.ok{display:block;background:#e8f5e9;border:1px solid #66bb6a;color:#1b5e20;}
+  .msg.err{display:block;background:#fdecea;border:1px solid #ef9a9a;color:#b71c1c;}
+  .msg.info{display:block;background:#e3f2fd;border:1px solid #90caf9;color:#0d47a1;}
+  .item{
+    display:flex;align-items:center;gap:10px;background:var(--cream);
+    border:1px solid #eadfc7;border-radius:12px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap;
+  }
+  .item.editing{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,75,.2);}
+  .item .tic{font-size:22px;flex:0 0 auto;}
+  .item .tinfo{flex:1;min-width:150px;}
+  .item .tinfo b{font-size:13.5px;color:var(--navy);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .item .tinfo small{font-size:11px;color:#9aa0ad;display:block;}
+  .item .acts{display:flex;gap:6px;flex:0 0 auto;}
+  .row{display:flex;gap:12px;}
+  .row > div{flex:1;}
+  details{margin-top:10px;}
+  summary{cursor:pointer;font-size:13px;color:var(--navy);font-weight:700;}
+  .filebox{
+    border:2px dashed var(--gold);border-radius:12px;padding:18px;text-align:center;
+    background:#fffdf8;cursor:pointer;transition:.2s;margin-top:6px;font-size:13.5px;color:#6a7284;display:block;
+  }
+  .filebox:hover{background:#fbf4e3;}
+  .filebox input{display:none;}
+  .subtabs{display:flex;gap:8px;margin-top:6px;}
+  .subtab{
+    flex:1;border:1.5px solid var(--navy);background:#fff;color:var(--navy);
+    border-radius:10px;padding:8px;font-size:13px;font-weight:700;cursor:pointer;
+    font-family:inherit;transition:.2s;
+  }
+  .subtab.active{background:var(--navy);color:var(--gold-light);}
+  #loginCard ol{padding-right:20px;font-size:13px;color:#4a5164;}
+  #loginCard ol li{margin-bottom:4px;}
+  code{background:#f0e9da;border-radius:6px;padding:1px 8px;font-size:12px;direction:ltr;display:inline-block;}
+  .editbar{
+    display:none;background:#fff8e6;border:1.5px solid var(--gold);border-radius:12px;
+    padding:10px 16px;font-size:13.5px;color:#7a5c14;margin-bottom:6px;
+    align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  }
+  .editbar.show{display:flex;}
+  .progress{display:none;height:8px;background:#eee;border-radius:8px;overflow:hidden;margin-top:10px;}
+  .progress.show{display:block;}
+  .progress .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .3s;}
+  .admin-tabs{display:none;justify-content:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .admin-tabs.show{display:flex;}
+  .admin-tab{
+    flex:1;min-width:220px;background:#fff;border:2px solid #eadfc7;color:var(--navy);
+    padding:14px 20px;border-radius:16px;font-size:15px;font-weight:700;
+    cursor:pointer;transition:.25s;text-align:center;box-shadow:0 4px 12px rgba(13,110,110,.05);
+    display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;
+  }
+  .admin-tab:hover{border-color:var(--gold);background:#fffdf8;}
+  .admin-tab.active{
+    background:linear-gradient(135deg,var(--navy),var(--navy-dark));
+    color:#fff;border-color:var(--navy);box-shadow:0 8px 20px rgba(13,110,110,.2);
+  }
+  @media(max-width:560px){.row{flex-direction:column;gap:0;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="secHeaderTitle">🛠 پنل مدیریت «محتوای دوره آنلاین»</h1>
+  <p>دوره کشوری تربیت مدرس ریاضی — تیمز ۲۰۲۷ — اصفهان</p>
+</header>
+
+<div class="wrap">
+
+  <!-- تب‌های مدیریت بخش‌ها -->
+  <div class="admin-tabs" id="adminTabs">
+    <button type="button" class="admin-tab active" id="tabCourse" data-tab="course">
+      📚 محتوای دوره آنلاین
+    </button>
+    <button type="button" class="admin-tab" id="tabActivities" data-tab="activities">
+      🎨 محتوای فعالیت‌ها (عکس و PDF)
+    </button>
+  </div>
+
+  <!-- ورود -->
+  <div class="card" id="loginCard">
+    <h2>🔑 ورود مدیر</h2>
+    <p style="font-size:13px;color:#4a5164;">برای مدیریت محتوا به «توکن دسترسی گیت‌هاب» نیاز دارید. توکن فقط در مرورگر خودتان ذخیره می‌شود.</p>
+    <label>توکن گیت‌هاب:</label>
+    <input type="password" id="token" placeholder="github_pat_... یا ghp_...">
+    <button class="btn" id="loginBtn">ورود و بارگذاری محتوا</button>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+
+  <!-- افزودن / ویرایش -->
+  <div class="card" id="addCard" style="display:none;">
+    <h2 id="formTitle">➕ افزودن محتوای جدید</h2>
+    <div class="editbar" id="editBar">
+      <span>✏️ در حال ویرایش: «<b id="editName"></b>»</span>
+      <button class="btn sm gray" id="cancelEdit">انصراف از ویرایش</button>
+    </div>
+    <label>نوع محتوا:</label>
+    <select id="fType">
+      <option value="pdf">📄 فایل PDF</option>
+      <option value="image">🖼️ فایل عکس (تصویر)</option>
+      <option value="video">🎬 ویدیو</option>
+      <option value="link">🔗 پیوند (سایت یا فرم)</option>
+    </select>
+    <label>عنوان:</label>
+    <input type="text" id="fTitle" placeholder="مثلاً: جزوه جلسه اول — چارچوب سنجش تیمز">
+    <label>توضیح کوتاه (اختیاری):</label>
+    <input type="text" id="fDesc" placeholder="مثلاً: ارائه‌شده در نشست علمی روز اول">
+    <label>تاریخ (اختیاری):</label>
+    <input type="text" id="fDate" placeholder="مثلاً: ۲۱ تیر ۱۴۰۵">
+
+    <!-- PDF -->
+    <div id="pdfZone">
+      <label>فایل PDF:</label>
+      <label class="filebox" id="pdfBoxLabel">
+        📎 برای انتخاب فایل PDF کلیک کنید (حداکثر ۲۵ مگابایت)
+        <input type="file" id="fFile" accept=".pdf">
+      </label>
+      <div class="hint" id="pdfHint">فایل خودکار در پوشه files مخزن آپلود می‌شود.</div>
+    </div>
+
+    <!-- IMAGE -->
+    <div id="imageZone" style="display:none;">
+      <label>فایل عکس / تصویر:</label>
+      <label class="filebox" id="imgBoxLabel">
+        🖼️ برای انتخاب فایل عکس کلیک کنید (حداکثر ۲۵ مگابایت)
+        <input type="file" id="fImgFile" accept="image/*">
+      </label>
+      <div class="hint">فایل خودکار در پوشه files مخزن آپلود می‌شود (فرمت‌های jpg, png, webp و...).</div>
+    </div>
+
+    <!-- VIDEO -->
+    <div id="videoZone" style="display:none;">
+      <label>ویدیو را چطور می‌گذارید؟</label>
+      <div class="subtabs">
+        <button type="button" class="subtab active" id="vtLink">🔗 لینک (آپارات/شاد/یوتیوب)</button>
+        <button type="button" class="subtab" id="vtFile">⬆️ آپلود فایل ویدیو</button>
+      </div>
+      <div id="vLinkZone">
+        <label>لینک ویدیو:</label>
+        <input type="text" id="fVUrl" placeholder="https://www.aparat.com/v/....." dir="ltr" style="text-align:left;">
+      </div>
+      <div id="vFileZone" style="display:none;">
+        <label>فایل ویدیو:</label>
+        <label class="filebox" id="vidBoxLabel">
+          🎬 برای انتخاب فایل ویدیو کلیک کنید (حداکثر ۲۵ مگابایت)
+          <input type="file" id="fVFile" accept="video/*">
+        </label>
+        <div class="hint">⚠️ گیت‌هاب برای آپلود مناسب ویدیوهای کوچک است. ویدیوهای بزرگ‌تر از ۲۵ مگابایت را در آپارات بارگذاری و لینکش را بگذارید.</div>
+      </div>
+    </div>
+
+    <!-- LINK -->
+    <div id="urlZone" style="display:none;">
+      <label>لینک:</label>
+      <input type="text" id="fUrl" placeholder="https://....." dir="ltr" style="text-align:left;">
+    </div>
+
+    <div class="hint" id="keepFileHint" style="display:none;">💡 اگر فایل جدیدی انتخاب نکنید، همان فایل قبلی حفظ می‌شود.</div>
+    <div class="progress" id="prog"><div class="bar" id="progBar"></div></div>
+    <button class="btn gold" id="addBtn">✅ ثبت و انتشار در سایت</button>
+    <div class="msg" id="addMsg"></div>
+  </div>
+
+  <!-- فهرست -->
+  <div class="card" id="listCard" style="display:none;">
+    <h2 id="listTitle">📚 محتوای فعلی دوره آنلاین در سایت</h2>
+    <div id="itemsList"></div>
+    <div class="msg" id="listMsg"></div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var OWNER = 'MohammadPartoo';
+  var REPO  = 'Esfahan.TIMSS2027Educators';
+  var API   = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/';
+  var MAX_MB = 25;
+
+  var token = localStorage.getItem('gh_token_esfahan') || '';
+  var items = [];
+  var activities = [];
+  var currentTab = 'course'; /* 'course' | 'activities' */
+  var contentSha = null;
+  var editingIndex = -1;   /* -1 = حالت افزودن */
+  var videoMode = 'link';  /* link | file */
+
+  var $ = function(id){ return document.getElementById(id); };
+  var ICONS = {pdf:'📄', image:'🖼️', video:'🎬', link:'🔗'};
+  var TYPE_FA = {pdf:'فایل PDF', image:'فایل عکس', video:'ویدیو', link:'پیوند'};
+
+  function show(id, cls, text){
+    var el = $(id);
+    el.className = 'msg ' + cls;
+    el.textContent = text;
+  }
+  function hide(id){ $(id).className = 'msg'; }
+
+  function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+  function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str.replace(/\n/g,'')))); }
+
+  function gh(path, opts){
+    opts = opts || {};
+    opts.headers = {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json'
+    };
+    return fetch(API + path, opts);
+  }
+
+  function getCurrentArray(){
+    return currentTab === 'course' ? items : activities;
+  }
+
+  function switchTab(tab){
+    if(editingIndex > -1) cancelEditMode();
+    currentTab = tab;
+    $('tabCourse').classList.toggle('active', tab === 'course');
+    $('tabActivities').classList.toggle('active', tab === 'activities');
+    if(tab === 'course'){
+      if($('secHeaderTitle')) $('secHeaderTitle').textContent = '🛠 پنل مدیریت «محتوای دوره آنلاین»';
+      $('listTitle').textContent = '📚 محتوای فعلی دوره آنلاین در سایت';
+      $('fType').value = 'pdf';
+    } else {
+      if($('secHeaderTitle')) $('secHeaderTitle').textContent = '🛠 پنل مدیریت «محتوای فعالیت‌ها»';
+      $('listTitle').textContent = '🎨 محتوای فعلی فعالیت‌ها در سایت';
+      $('fType').value = 'image';
+    }
+    applyTypeUI($('fType').value);
+    hide('addMsg');
+    hide('listMsg');
+    renderList();
+  }
+  if($('tabCourse')) $('tabCourse').addEventListener('click', function(){ switchTab('course'); });
+  if($('tabActivities')) $('tabActivities').addEventListener('click', function(){ switchTab('activities'); });
+
+  /* ---------- load ---------- */
+  function loadContent(){
+    show('loginMsg','info','در حال اتصال به گیت‌هاب…');
+    gh('content.json?ref=main').then(function(r){
+      if(r.status === 401) throw new Error('توکن نامعتبر است. دوباره بسازید.');
+      if(r.status === 404) return null;
+      if(!r.ok) throw new Error('خطای اتصال (' + r.status + ')');
+      return r.json();
+    }).then(function(data){
+      if(data){
+        contentSha = data.sha;
+        try{
+          var parsed = JSON.parse(b64DecodeUnicode(data.content));
+          items = parsed.items || (Array.isArray(parsed) ? parsed : []);
+          activities = parsed.activities || [];
+        }catch(e){ items = []; activities = []; }
+      } else { contentSha = null; items = []; activities = []; }
+      localStorage.setItem('gh_token_esfahan', token);
+      $('loginCard').style.display = 'none';
+      if($('adminTabs')) $('adminTabs').style.display = 'flex';
+      $('addCard').style.display = '';
+      $('listCard').style.display = '';
+      renderList();
+    }).catch(function(e){
+      show('loginMsg','err','⚠️ ' + e.message);
+    });
+  }
+
+  /* ---------- save content.json ---------- */
+  function saveContent(message){
+    var body = {
+      message: message,
+      content: b64EncodeUnicode(JSON.stringify({items: items, activities: activities}, null, 2)),
+      branch: 'main'
+    };
+    if(contentSha) body.sha = contentSha;
+    return gh('content.json', {method:'PUT', body: JSON.stringify(body)})
+      .then(function(r){
+        if(!r.ok) return r.json().then(function(j){ throw new Error(j.message || r.status); });
+        return r.json();
+      }).then(function(j){
+        contentSha = j.content.sha;
+      });
+  }
+
+  /* ---------- upload file (pdf, image or video) ---------- */
+  function uploadFile(file){
+    return new Promise(function(resolve, reject){
+      if(file.size > MAX_MB * 1024 * 1024)
+        return reject(new Error('حجم فایل بیش از ' + MAX_MB + ' مگابایت است. ویدیوهای بزرگ را در آپارات بگذارید و لینک بدهید.'));
+      $('prog').classList.add('show');
+      $('progBar').style.width = '15%';
+      var reader = new FileReader();
+      reader.onload = function(){
+        $('progBar').style.width = '45%';
+        var b64 = reader.result.split(',')[1];
+        var ext = (file.name.lastIndexOf('.') > -1) ? file.name.slice(file.name.lastIndexOf('.')) : '';
+        var base = file.name.slice(0, file.name.length - ext.length)
+          .replace(/\s+/g,'-')
+          .replace(/[^\w\-]/g,'')
+          .slice(0, 40) || 'file';
+        var path = 'files/' + Date.now() + '-' + base + ext.toLowerCase();
+        gh(path, {method:'PUT', body: JSON.stringify({
+          message: 'آپلود فایل: ' + file.name,
+          content: b64,
+          branch: 'main'
+        })}).then(function(r){
+          $('progBar').style.width = '90%';
+          if(!r.ok) return r.json().then(function(j){ throw new Error(j.message || r.status); });
+          $('progBar').style.width = '100%';
+          setTimeout(function(){ $('prog').classList.remove('show'); $('progBar').style.width='0%'; }, 600);
+          resolve(path);
+        }).catch(function(e){
+          $('prog').classList.remove('show'); $('progBar').style.width='0%';
+          reject(e);
+        });
+      };
+      reader.onerror = function(){
+        $('prog').classList.remove('show');
+        reject(new Error('خطا در خواندن فایل'));
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ---------- render list ---------- */
+  function renderList(){
+    var arr = getCurrentArray();
+    var box = $('itemsList');
+    if(!arr.length){
+      box.innerHTML = '<p style="font-size:13.5px;color:#9aa0ad;text-align:center;padding:10px;">هنوز محتوایی در این بخش ثبت نشده است.</p>';
+      return;
+    }
+    box.innerHTML = '';
+    arr.forEach(function(it, i){
+      var div = document.createElement('div');
+      div.className = 'item' + (i === editingIndex ? ' editing' : '');
+      div.innerHTML =
+        '<span class="tic">' + (ICONS[it.type] || '🔗') + '</span>' +
+        '<div class="tinfo"><b></b><small>' + (TYPE_FA[it.type] || '') + (it.date ? ' — ' + it.date : '') + '</small></div>' +
+        '<div class="acts">' +
+          '<button class="btn sm" data-edit="' + i + '">✏️ ویرایش</button>' +
+          '<button class="btn sm danger" data-del="' + i + '">حذف</button>' +
+        '</div>';
+      div.querySelector('b').textContent = it.title;
+      box.appendChild(div);
+    });
+    box.querySelectorAll('button[data-del]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var i = parseInt(btn.getAttribute('data-del'), 10);
+        var arr = getCurrentArray();
+        if(!confirm('«' + arr[i].title + '» از سایت حذف شود؟')) return;
+        var removed = arr.splice(i, 1);
+        if(editingIndex === i) cancelEditMode();
+        btn.disabled = true;
+        saveContent('حذف: ' + removed[0].title).then(function(){
+          show('listMsg','ok','✅ حذف شد. سایت تا ۱-۲ دقیقه دیگر به‌روز می‌شود.');
+          renderList();
+        }).catch(function(e){
+          arr.splice(i, 0, removed[0]);
+          show('listMsg','err','⚠️ ' + e.message);
+          renderList();
+        });
+      });
+    });
+    box.querySelectorAll('button[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        startEdit(parseInt(btn.getAttribute('data-edit'), 10));
+      });
+    });
+  }
+
+  /* ---------- edit mode ---------- */
+  function startEdit(i){
+    editingIndex = i;
+    var arr = getCurrentArray();
+    var it = arr[i];
+    $('formTitle').textContent = '✏️ ویرایش محتوا';
+    $('editBar').classList.add('show');
+    $('editName').textContent = it.title;
+    $('fType').value = it.type;
+    applyTypeUI(it.type);
+    $('fTitle').value = it.title || '';
+    $('fDesc').value = it.desc || '';
+    $('fDate').value = it.date || '';
+    if(it.type === 'video'){
+      var isFile = !/^https?:\/\//.test(it.url || '');
+      setVideoMode(isFile ? 'file' : 'link');
+      if(!isFile) $('fVUrl').value = it.url || '';
+    } else if(it.type === 'link'){
+      $('fUrl').value = it.url || '';
+    }
+    $('keepFileHint').style.display = (it.type === 'pdf' || it.type === 'image' || it.type === 'video') ? '' : 'none';
+    $('addBtn').textContent = '💾 ذخیره تغییرات';
+    hide('addMsg');
+    $('addCard').scrollIntoView({behavior:'smooth'});
+    renderList();
+  }
+
+  function cancelEditMode(){
+    editingIndex = -1;
+    $('formTitle').textContent = currentTab === 'course' ? '➕ افزودن محتوای جدید به دوره آنلاین' : '➕ افزودن فعالیت جدید';
+    $('editBar').classList.remove('show');
+    $('addBtn').textContent = '✅ ثبت و انتشار در سایت';
+    $('keepFileHint').style.display = 'none';
+    clearForm();
+    renderList();
+  }
+  $('cancelEdit').addEventListener('click', cancelEditMode);
+
+  function clearForm(){
+    $('fTitle').value = ''; $('fDesc').value = ''; $('fDate').value = '';
+    $('fUrl').value = ''; $('fVUrl').value = '';
+    $('fFile').value = ''; $('fVFile').value = '';
+    if($('fImgFile')) $('fImgFile').value = '';
+    $('pdfBoxLabel').childNodes[0].textContent = '📎 برای انتخاب فایل PDF کلیک کنید (حداکثر ۲۵ مگابایت) ';
+    if($('imgBoxLabel')) $('imgBoxLabel').childNodes[0].textContent = '🖼️ برای انتخاب فایل عکس کلیک کنید (حداکثر ۲۵ مگابایت) ';
+    $('vidBoxLabel').childNodes[0].textContent = '🎬 برای انتخاب فایل ویدیو کلیک کنید (حداکثر ۲۵ مگابایت) ';
+  }
+
+  /* ---------- type & video-mode UI ---------- */
+  function applyTypeUI(type){
+    $('pdfZone').style.display   = type === 'pdf'   ? '' : 'none';
+    if($('imageZone')) $('imageZone').style.display = type === 'image' ? '' : 'none';
+    $('videoZone').style.display = type === 'video' ? '' : 'none';
+    $('urlZone').style.display   = type === 'link'  ? '' : 'none';
+  }
+  $('fType').addEventListener('change', function(){ applyTypeUI(this.value); });
+
+  function setVideoMode(mode){
+    videoMode = mode;
+    $('vtLink').classList.toggle('active', mode === 'link');
+    $('vtFile').classList.toggle('active', mode === 'file');
+    $('vLinkZone').style.display = mode === 'link' ? '' : 'none';
+    $('vFileZone').style.display = mode === 'file' ? '' : 'none';
+  }
+  $('vtLink').addEventListener('click', function(){ setVideoMode('link'); });
+  $('vtFile').addEventListener('click', function(){ setVideoMode('file'); });
+
+  $('fFile').addEventListener('change', function(){
+    if(this.files[0]) $('pdfBoxLabel').childNodes[0].textContent = '📎 ' + this.files[0].name + ' ';
+  });
+  if($('fImgFile')){
+    $('fImgFile').addEventListener('change', function(){
+      if(this.files[0]) $('imgBoxLabel').childNodes[0].textContent = '🖼️ ' + this.files[0].name + ' ';
+    });
+  }
+  $('fVFile').addEventListener('change', function(){
+    if(this.files[0]) $('vidBoxLabel').childNodes[0].textContent = '🎬 ' + this.files[0].name + ' ';
+  });
+
+  /* ---------- submit (add or edit) ---------- */
+  $('addBtn').addEventListener('click', function(){
+    hide('addMsg');
+    var type = $('fType').value;
+    var title = $('fTitle').value.trim();
+    if(!title) return show('addMsg','err','⚠️ عنوان را وارد کنید.');
+    var isEdit = editingIndex > -1;
+    var arr = getCurrentArray();
+    var oldItem = isEdit ? arr[editingIndex] : null;
+    var btn = this; btn.disabled = true;
+
+    var getUrl;
+    if(type === 'pdf'){
+      var f = $('fFile').files[0];
+      if(f){
+        show('addMsg','info','در حال آپلود فایل…');
+        getUrl = uploadFile(f);
+      } else if(isEdit && oldItem.type === 'pdf'){
+        getUrl = Promise.resolve(oldItem.url); /* keep old file */
+      } else {
+        btn.disabled = false;
+        return show('addMsg','err','⚠️ فایل PDF را انتخاب کنید.');
+      }
+    } else if(type === 'image'){
+      var imgF = $('fImgFile').files[0];
+      if(imgF){
+        show('addMsg','info','در حال آپلود عکس…');
+        getUrl = uploadFile(imgF);
+      } else if(isEdit && oldItem.type === 'image'){
+        getUrl = Promise.resolve(oldItem.url); /* keep old file */
+      } else {
+        btn.disabled = false;
+        return show('addMsg','err','⚠️ فایل عکس را انتخاب کنید.');
+      }
+    } else if(type === 'video'){
+      if(videoMode === 'file'){
+        var vf = $('fVFile').files[0];
+        if(vf){
+          show('addMsg','info','در حال آپلود ویدیو… (بسته به حجم ممکن است چند دقیقه طول بکشد)');
+          getUrl = uploadFile(vf);
+        } else if(isEdit && oldItem.type === 'video' && !/^https?:\/\//.test(oldItem.url || '')){
+          getUrl = Promise.resolve(oldItem.url);
+        } else {
+          btn.disabled = false;
+          return show('addMsg','err','⚠️ فایل ویدیو را انتخاب کنید یا حالت «لینک» را بزنید.');
+        }
+      } else {
+        var vu = $('fVUrl').value.trim();
+        if(!/^https?:\/\//.test(vu)){ btn.disabled = false; return show('addMsg','err','⚠️ لینک ویدیو باید با https شروع شود.'); }
+        getUrl = Promise.resolve(vu);
+      }
+    } else {
+      var u = $('fUrl').value.trim();
+      if(!/^https?:\/\//.test(u)){ btn.disabled = false; return show('addMsg','err','⚠️ لینک باید با https شروع شود.'); }
+      getUrl = Promise.resolve(u);
+    }
+
+    getUrl.then(function(url){
+      var item = {type: type, title: title, url: url};
+      var d = $('fDesc').value.trim(); if(d) item.desc = d;
+      var dt = $('fDate').value.trim(); if(dt) item.date = dt;
+      var msg;
+      if(isEdit){
+        arr[editingIndex] = item;
+        msg = 'ویرایش (' + (currentTab === 'course' ? 'دوره' : 'فعالیت') + '): ' + title;
+      } else {
+        arr.unshift(item);
+        msg = 'افزودن (' + (currentTab === 'course' ? 'دوره' : 'فعالیت') + '): ' + title;
+      }
+      show('addMsg','info','در حال انتشار…');
+      return saveContent(msg);
+    }).then(function(){
+      show('addMsg','ok', isEdit ? '✅ ویرایش ذخیره شد! سایت تا ۱-۲ دقیقه دیگر به‌روز می‌شود.' : '✅ منتشر شد! سایت تا ۱-۲ دقیقه دیگر به‌روز می‌شود.');
+      if(isEdit) cancelEditMode(); else clearForm();
+      renderList();
+      btn.disabled = false;
+    }).catch(function(e){
+      show('addMsg','err','⚠️ ' + e.message);
+      btn.disabled = false;
+    });
+  });
+
+  /* ---------- login ---------- */
+  $('loginBtn').addEventListener('click', function(){
+    token = $('token').value.trim();
+    if(!token) return show('loginMsg','err','⚠️ توکن را وارد کنید.');
+    loadContent();
+  });
+  if(token){
+    $('token').value = token;
+    loadContent();
+  }
+})();
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a158f4ca6b9b0eda',t:'MTc4MzExMzg1Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
