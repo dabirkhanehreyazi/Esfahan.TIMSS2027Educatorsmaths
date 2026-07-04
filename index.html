@@ -607,6 +607,12 @@
   .ccard.pdf .cic{background:rgba(200,60,60,.12);border:1.5px solid #c0504d;}
   .ccard.video .cic{background:rgba(13,110,110,.08);border:1.5px solid var(--navy);}
   .ccard.link .cic{background:rgba(201,162,75,.14);border:1.5px solid var(--gold);}
+  .ccard.image .cic{background:rgba(46,125,50,.12);border:1.5px solid #2e7d32;}
+  .ccard .c-thumb{
+    width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:6px;
+    border:1px solid #eadfc7;cursor:zoom-in;transition:filter .25s;
+  }
+  .ccard .c-thumb:hover{filter:brightness(1.08);}
   .ccard h3{color:var(--navy);font-size:15.5px;line-height:1.7;flex:1;}
   .ccard p{font-size:13px;color:#5b6272;flex:1;}
   .ccard .cmeta{font-size:11.5px;color:#9aa0ad;}
@@ -866,6 +872,7 @@
       <a href="#event">دوره کشوری</a>
       <a href="#timss">تیمز ۲۰۲۷</a>
       <a href="#content">محتوای دوره</a>
+      <a href="#activities">فعالیت‌ها</a>
       <a href="#schedule">برنامه دوره</a>
       <a href="#attractions">جاذبه‌ها</a>
       <a href="#venue">محل برگزاری</a>
@@ -1070,6 +1077,40 @@
     <div class="content-empty" id="contentEmpty">
       📚 هنوز محتوایی بارگذاری نشده است.<br>
       جزوه‌ها و ویدیوهای دوره پس از برگزاری جلسات، در همین بخش قرار می‌گیرد.
+    </div>
+  </div>
+</section>
+
+<section class="content-sec patterned" id="activities" style="background:#fffdf8;border-top:1px solid #eadfc7;border-bottom:1px solid #eadfc7;">
+  <div class="container">
+    <div class="sec-banner"><img class="banner-fill" alt="دبیرخانه راهبر"></div>
+    <div class="sec-title">
+      <div class="orn"><svg class="orn-svg" viewBox="0 0 240 28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g stroke="#c9a24b" stroke-width="1.6" fill="none" stroke-linecap="round">
+          <path d="M14 14 H86"/><path d="M154 14 H226"/>
+          <path d="M86 14 q6 -7 12 0 q-6 7 -12 0"/>
+          <path d="M142 14 q6 -7 12 0 q-6 7 -12 0"/>
+        </g>
+        <g fill="#c9a24b">
+          <circle cx="14" cy="14" r="2.6"/><circle cx="226" cy="14" r="2.6"/>
+          <path d="M120 3 L123.2 10.8 L131 14 L123.2 17.2 L120 25 L116.8 17.2 L109 14 L116.8 10.8 Z"/>
+          <path d="M120 8.2 L121.7 12.3 L125.8 14 L121.7 15.7 L120 19.8 L118.3 15.7 L114.2 14 L118.3 12.3 Z" fill="#e8cf94"/>
+        </g>
+      </svg></div>
+      <h2>فعالیت‌ها</h2>
+      <p>گزارش‌های تصویری، فایل‌های فعالیت و مستندات اجرایی دوره — توسط دبیرخانه بارگذاری می‌شود</p>
+    </div>
+    <div class="cfilters" id="afilters" style="display:none;">
+      <button class="cfilter active" data-type="all">همه</button>
+      <button class="cfilter" data-type="image">🖼️ تصاویر و عکس‌ها</button>
+      <button class="cfilter" data-type="pdf">📄 فایل‌های PDF</button>
+      <button class="cfilter" data-type="video">🎬 ویدیوها</button>
+      <button class="cfilter" data-type="link">🔗 پیوندها</button>
+    </div>
+    <div class="content-grid" id="activitiesGrid"></div>
+    <div class="content-empty" id="activitiesEmpty">
+      🎨 هنوز فعالیتی بارگذاری نشده است.<br>
+      تصاویر و فایل‌های فعالیت‌های دوره به مرور در این بخش قرار می‌گیرد.
     </div>
   </div>
 </section>
@@ -1814,16 +1855,13 @@
   vbTable.addEventListener('click', function(){ setView('table'); });
   setView('timeline');
 
-  /* ---------- online course content (from content.json) ---------- */
+  /* ---------- online course content & activities (from content.json) ---------- */
   (function(){
-    var grid = document.getElementById('contentGrid');
-    var empty = document.getElementById('contentEmpty');
-    var filters = document.getElementById('cfilters');
-    if(!grid) return;
     var TYPE_META = {
       pdf:   {ic:'📄', btn:'دانلود فایل', cls:'pdf'},
       video: {ic:'🎬', btn:'مشاهده ویدیو', cls:'video'},
-      link:  {ic:'🔗', btn:'باز کردن پیوند', cls:'link'}
+      link:  {ic:'🔗', btn:'باز کردن پیوند', cls:'link'},
+      image: {ic:'🖼️', btn:'مشاهده تصویر', cls:'image'}
     };
     function esc(s){
       return String(s == null ? '' : s)
@@ -1864,57 +1902,101 @@
       vframe.innerHTML = ''; /* توقف کامل پخش */
       document.body.style.overflow = '';
     }
-    document.getElementById('vclose').addEventListener('click', closeVideo);
-    vmodal.addEventListener('click', function(e){ if(e.target === vmodal) closeVideo(); });
+    if(document.getElementById('vclose')) document.getElementById('vclose').addEventListener('click', closeVideo);
+    if(vmodal) vmodal.addEventListener('click', function(e){ if(e.target === vmodal) closeVideo(); });
     document.addEventListener('keydown', function(e){
-      if(e.key === 'Escape' && vmodal.classList.contains('open')) closeVideo();
+      if(e.key === 'Escape' && vmodal && vmodal.classList.contains('open')) closeVideo();
     });
 
-    function render(items){
-      if(!items || !items.length){ return; }
+    /* ---- image lightbox helper ---- */
+    window.openLightboxImage = function(url, caption){
+      var lb = document.getElementById('lightbox');
+      var lbImg = document.getElementById('lbImg');
+      var lbCap = document.getElementById('lbCaption');
+      if(!lb || !lbImg) return window.open(url, '_blank');
+      lbImg.src = url;
+      lbImg.alt = caption || '';
+      if(lbCap) lbCap.textContent = caption || '';
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    function renderSection(items, gridId, emptyId, filtersId){
+      var grid = document.getElementById(gridId);
+      var empty = document.getElementById(emptyId);
+      var filters = document.getElementById(filtersId);
+      if(!grid || !empty) return;
+      if(!items || !items.length){
+        empty.style.display = '';
+        grid.innerHTML = '';
+        if(filters) filters.style.display = 'none';
+        return;
+      }
       try{
-      empty.style.display = 'none';
-      filters.style.display = 'flex';
-      grid.innerHTML = items.map(function(it, idx){
-        var t = TYPE_META[it.type] || TYPE_META.link;
-        var url = it.url || '#';
-        var btnHtml;
-        if(it.type === 'video'){
-          btnHtml = '<button class="cbtn" data-video="' + idx + '">' + t.ic + ' ' + t.btn + '</button>';
-        } else {
-          btnHtml = '<a class="cbtn" href="' + esc(url) + '" target="_blank" rel="noopener">' + t.ic + ' ' + t.btn + '</a>';
-        }
-        return '<div class="ccard ' + t.cls + '" data-type="' + t.cls + '">' +
-          '<div class="chead"><div class="cic">' + t.ic + '</div>' +
-          '<h3>' + esc(it.title) + '</h3></div>' +
-          (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') +
-          (it.date ? '<div class="cmeta">🗓 ' + esc(it.date) + '</div>' : '') +
-          btnHtml +
-          '</div>';
-      }).join('');
-      /* video buttons */
-      grid.querySelectorAll('button[data-video]').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var it = items[parseInt(btn.getAttribute('data-video'), 10)];
-          openVideo(it.url, it.title);
-        });
-      });
-      /* filter buttons */
-      filters.querySelectorAll('.cfilter').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          filters.querySelectorAll('.cfilter').forEach(function(b){ b.classList.remove('active'); });
-          btn.classList.add('active');
-          var type = btn.getAttribute('data-type');
-          grid.querySelectorAll('.ccard').forEach(function(c){
-            c.style.display = (type === 'all' || c.getAttribute('data-type') === type) ? '' : 'none';
+        empty.style.display = 'none';
+        if(filters) filters.style.display = 'flex';
+        grid.innerHTML = items.map(function(it, idx){
+          var t = TYPE_META[it.type] || TYPE_META.link;
+          var url = it.url || '#';
+          var btnHtml, thumbHtml = '';
+          if(it.type === 'video'){
+            btnHtml = '<button class="cbtn" data-video="' + idx + '">' + t.ic + ' ' + t.btn + '</button>';
+          } else if(it.type === 'image'){
+            thumbHtml = '<img class="c-thumb" src="' + esc(url) + '" alt="' + esc(it.title) + '" data-img="' + idx + '" loading="lazy">';
+            btnHtml = '<button class="cbtn" data-img="' + idx + '">' + t.ic + ' ' + t.btn + '</button>';
+          } else {
+            btnHtml = '<a class="cbtn" href="' + esc(url) + '" target="_blank" rel="noopener">' + t.ic + ' ' + t.btn + '</a>';
+          }
+          return '<div class="ccard ' + t.cls + '" data-type="' + t.cls + '">' +
+            thumbHtml +
+            '<div class="chead"><div class="cic">' + t.ic + '</div>' +
+            '<h3>' + esc(it.title) + '</h3></div>' +
+            (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') +
+            (it.date ? '<div class="cmeta">🗓 ' + esc(it.date) + '</div>' : '') +
+            btnHtml +
+            '</div>';
+        }).join('');
+
+        /* video buttons */
+        grid.querySelectorAll('button[data-video]').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var it = items[parseInt(btn.getAttribute('data-video'), 10)];
+            openVideo(it.url, it.title);
           });
         });
-      });
+        /* image buttons / thumbs */
+        grid.querySelectorAll('[data-img]').forEach(function(el){
+          el.addEventListener('click', function(e){
+            e.preventDefault();
+            var it = items[parseInt(el.getAttribute('data-img'), 10)];
+            if(window.openLightboxImage) window.openLightboxImage(it.url, it.title);
+            else window.open(it.url, '_blank');
+          });
+        });
+        /* filter buttons */
+        if(filters){
+          filters.querySelectorAll('.cfilter').forEach(function(btn){
+            btn.addEventListener('click', function(){
+              filters.querySelectorAll('.cfilter').forEach(function(b){ b.classList.remove('active'); });
+              btn.classList.add('active');
+              var type = btn.getAttribute('data-type');
+              grid.querySelectorAll('.ccard').forEach(function(c){
+                c.style.display = (type === 'all' || c.getAttribute('data-type') === type) ? '' : 'none';
+              });
+            });
+          });
+        }
       }catch(e){ console.error('render error:', e); }
     }
+
     fetch('content.json?v=' + Date.now() + '&cb=' + Math.random())
       .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(data){ render(data.items || data); })
+      .then(function(data){
+        var courseItems = data.items || (Array.isArray(data) ? data : []);
+        var activityItems = data.activities || [];
+        renderSection(courseItems, 'contentGrid', 'contentEmpty', 'cfilters');
+        renderSection(activityItems, 'activitiesGrid', 'activitiesEmpty', 'afilters');
+      })
       .catch(function(){ /* فایل هنوز ساخته نشده — پیام پیش‌فرض می‌ماند */ });
   })();
 
@@ -2028,5 +2110,6 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1554604eff5a60a',t:'MTc4MzA3NTI0MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
