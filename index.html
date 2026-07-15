@@ -452,6 +452,18 @@
     display:none;background:var(--gold);color:var(--navy-dark);font-weight:900;
     border-radius:30px;padding:10px 30px;font-size:17px;margin:26px auto 6px;
   }
+  .live-status{
+    display:none;color:var(--gold-light);font-weight:800;font-size:14px;
+    letter-spacing:.3px;margin-top:20px;
+  }
+  .live-title{
+    display:none;color:#fff;font-weight:800;font-size:clamp(16px,3vw,21px);
+    max-width:680px;margin:6px auto 0;line-height:1.6;
+  }
+  .cd-next{
+    display:none;color:#c9d4ea;font-size:13.5px;margin-top:12px;
+  }
+  .cd-next b{color:var(--gold-light);}
   @media(max-width:560px){
     .countdown{gap:8px;}
     .cd-box{min-width:70px;padding:9px 6px 7px;}
@@ -894,14 +906,17 @@
     <p class="sub">باشکوه‌ترین شهر تاریخی ایران و میزبان مدرسان ریاضی سراسر کشور در راستای مطالعات تیمز ۲۰۲۷<br>۲۴ تا ۲۶ تیرماه ۱۴۰۵</p>
     <a class="cta fill" href="#event">اطلاعات دوره</a>
     <a class="cta" href="#attractions">آشنایی با اصفهان</a>
-    <div class="countdown" id="countdown" aria-label="شمارش معکوس تا آغاز دوره">
+    <div class="live-status" id="liveStatus"></div>
+    <div class="live-title" id="liveTitle"></div>
+    <div class="countdown" id="countdown" aria-label="شمارش معکوس">
       <div class="cd-box"><b id="cdDays">--</b><span>روز</span></div>
       <div class="cd-box"><b id="cdHours">--</b><span>ساعت</span></div>
       <div class="cd-box"><b id="cdMins">--</b><span>دقیقه</span></div>
       <div class="cd-box"><b id="cdSecs">--</b><span>ثانیه</span></div>
     </div>
-    <div class="cd-done" id="cdDone">🌿 دوره در حال برگزاری است</div>
-    <div style="color:#dfe7f5;font-size:13px;margin-top:10px;">تا آغاز دوره — ۲۴ تیر ۱۴۰۵</div>
+    <div class="cd-done" id="cdDone">✅ دوره برگزار شد — با سپاس از حضور شما</div>
+    <div style="color:#dfe7f5;font-size:13px;margin-top:10px;" id="cdCaption">تا آغاز دوره — ۲۴ تیر ۱۴۰۵</div>
+    <div class="cd-next" id="cdNext">برنامه بعدی: <b id="cdNextTitle"></b></div>
   </div>
 </div>
 
@@ -1574,22 +1589,100 @@
     else if(e.key === 'ArrowRight') prev();
   });
 
-  /* ---------- countdown to 24 Tir 1405 (15 July 2026, 08:00 Iran time) ---------- */
+  /* ---------- live program status (based on real schedule, 24-26 Tir 1405 / 15-17 July 2026) ---------- */
   var fa = function(n){ return String(n).replace(/\d/g, function(d){ return '۰۱۲۳۴۵۶۷۸۹'[d]; }); };
   var pad2 = function(n){ return n < 10 ? '0' + n : '' + n; };
-  var startAt = new Date('2026-07-15T08:00:00+03:30').getTime();
-  var endAt   = new Date('2026-07-17T18:00:00+03:30').getTime();
-  var cdWrap = document.getElementById('countdown');
-  var cdDone = document.getElementById('cdDone');
+  var timeOf = function(iso){ return fa(iso.substr(11, 5)); };
+
+  var PROGRAM = [
+    {s:'2026-07-15T08:00:00+03:30', e:'2026-07-15T09:30:00+03:30', t:'نشست و سخنرانی عمومی وزارت'},
+    {s:'2026-07-15T10:00:00+03:30', e:'2026-07-15T12:00:00+03:30', t:'چیستی و چرایی و روند تحولات مطالعات تیمز'},
+    {s:'2026-07-15T14:00:00+03:30', e:'2026-07-15T15:30:00+03:30', t:'سنجش'},
+    {s:'2026-07-15T16:00:00+03:30', e:'2026-07-15T17:30:00+03:30', t:'سطوح شناختی تیمز و مصادیق آن در کتاب‌های درسی ریاضی و مطالعات تیمز'},
+
+    {s:'2026-07-16T07:30:00+03:30', e:'2026-07-16T09:30:00+03:30', t:'بدفهمی‌ها و نقش آن‌ها در طراحی سؤالات واقعیت‌مدار و مفهومی/ چگونگی طراحی سؤال/ کدگذاری'},
+    {s:'2026-07-16T10:00:00+03:30', e:'2026-07-16T12:00:00+03:30', t:'طراحی سؤالات شبه‌تیمز بر اساس حوزه‌های محتوایی تیمز ۲۰۲۷'},
+    {s:'2026-07-16T14:00:00+03:30', e:'2026-07-16T15:30:00+03:30', t:'کارگاه آزمایشگاه مجازی در آموزش ریاضی (جئوجبرا/ دسموس و...)'},
+    {s:'2026-07-16T16:00:00+03:30', e:'2026-07-16T17:30:00+03:30', t:'کارگاه هوش مصنوعی در آموزش'},
+
+    {s:'2026-07-17T07:30:00+03:30', e:'2026-07-17T09:30:00+03:30', t:'کارگاه ارائه فعالیت‌های آزمایشگاه مجازی و هوش مصنوعی و...'},
+    {s:'2026-07-17T11:00:00+03:30', e:'2026-07-17T13:00:00+03:30', t:'اختتامیه'}
+  ];
+
+  var firstStart = Date.parse(PROGRAM[0].s);
+  var lastEnd = Date.parse(PROGRAM[PROGRAM.length - 1].e);
+
+  var elCountdown = document.getElementById('countdown');
+  var elDone = document.getElementById('cdDone');
+  var elCaption = document.getElementById('cdCaption');
+  var elLiveStatus = document.getElementById('liveStatus');
+  var elLiveTitle = document.getElementById('liveTitle');
+  var elNext = document.getElementById('cdNext');
+  var elNextTitle = document.getElementById('cdNextTitle');
+
+  function findState(now){
+    for(var i = 0; i < PROGRAM.length; i++){
+      var s = Date.parse(PROGRAM[i].s), e = Date.parse(PROGRAM[i].e);
+      if(now >= s && now < e){
+        return {mode:'running', cur:PROGRAM[i], next:PROGRAM[i+1] || null, target:e};
+      }
+      if(now < s){
+        return {mode:'waiting', next:PROGRAM[i], target:s};
+      }
+    }
+    return {mode:'done'};
+  }
+
   function tick(){
     var now = Date.now();
-    if(now >= startAt){
-      cdWrap.style.display = 'none';
-      if(now <= endAt){ cdDone.style.display = 'inline-block'; }
-      else { cdDone.style.display = 'inline-block'; cdDone.textContent = '✅ دوره برگزار شد — با سپاس از حضور شما'; }
+
+    if(now >= lastEnd){
+      elCountdown.style.display = 'none';
+      elLiveStatus.style.display = 'none';
+      elLiveTitle.style.display = 'none';
+      elCaption.style.display = 'none';
+      elNext.style.display = 'none';
+      elDone.style.display = 'inline-block';
       return;
     }
-    var diff = Math.floor((startAt - now) / 1000);
+
+    var st = findState(now);
+    elDone.style.display = 'none';
+    elCountdown.style.display = 'flex';
+    var target;
+
+    if(st.mode === 'running'){
+      elLiveStatus.style.display = 'block';
+      elLiveTitle.style.display = 'block';
+      elLiveStatus.textContent = '🔴 هم‌اکنون در حال برگزاری';
+      elLiveTitle.textContent = st.cur.t;
+      elCaption.style.display = 'none';
+      target = st.target;
+      if(st.next){
+        elNext.style.display = 'block';
+        elNextTitle.textContent = st.next.t + ' — ساعت ' + timeOf(st.next.s);
+      } else {
+        elNext.style.display = 'none';
+      }
+    } else { /* waiting */
+      elNext.style.display = 'none';
+      if(now < firstStart){
+        elLiveStatus.style.display = 'none';
+        elLiveTitle.style.display = 'none';
+        elCaption.style.display = 'block';
+        elCaption.textContent = 'تا آغاز دوره — ۲۴ تیر ۱۴۰۵';
+      } else {
+        elLiveStatus.style.display = 'block';
+        elLiveTitle.style.display = 'block';
+        elCaption.style.display = 'none';
+        elLiveStatus.textContent = '⏳ برنامه بعدی';
+        elLiveTitle.textContent = st.next.t + ' — ساعت ' + timeOf(st.next.s);
+      }
+      target = st.target;
+    }
+
+    var diff = Math.floor((target - now) / 1000);
+    if(diff < 0) diff = 0;
     var d = Math.floor(diff / 86400);
     var h = Math.floor((diff % 86400) / 3600);
     var m = Math.floor((diff % 3600) / 60);
